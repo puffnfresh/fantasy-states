@@ -12,7 +12,7 @@ State.prototype.chain = function(f) {
     var state = this;
     return State(function(s) {
         var result = state.run(s);
-        return f(result._1).run(result._2);
+        return f.call(state, result._1).run(result._2);
     });
 };
 State.get = State(function(s) {
@@ -67,7 +67,7 @@ State.StateT = function(M) {
         return StateT(function(s) {
             var result = state.run(s);
             return result.chain(function(t) {
-                return f(t._1).run(t._2);
+                return f.call(state, t._1).run(t._2);
             });
         });
     };
