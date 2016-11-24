@@ -55,6 +55,12 @@ State.StateT = (M) => {
         });
     };
 
+    StateT.liftf = (f) => (m) => {
+        return StateT((s) => {
+            return f(m.evalState(s)).map((x) => Tuple2(x, s));
+        });
+    };
+
     StateT.of = (a) => {
         return StateT((b) => M.of(Tuple2(a, b)));
     };
