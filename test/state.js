@@ -51,5 +51,18 @@ exports.stateT = {
     'All (Monad)': monad.laws(λ)(State.StateT(Identity), run),
     'Left Identity (Monad)': monad.leftIdentity(λ)(State.StateT(Identity), run),
     'Right Identity (Monad)': monad.rightIdentity(λ)(State.StateT(Identity), run),
-    'Associativity (Monad)': monad.associativity(λ)(State.StateT(Identity), run)
+    'Associativity (Monad)': monad.associativity(λ)(State.StateT(Identity), run),
+
+    // Helper tests
+    'liftf': (test) => {
+        const Inner = Identity;
+        const Outer = State.StateT(Inner);
+        const f = (id) => Inner.of(id.x + 1);
+        const f_ = Outer.liftf(f);
+        const actual = f_(Outer.of(1));
+        test.ok(actual instanceof Outer, '_f returned an Outer');
+        test.equal(actual.evalState().x, 2, 'f was applied to inner');
+        test.done();
+    }
+
 };
