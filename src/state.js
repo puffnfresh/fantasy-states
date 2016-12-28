@@ -55,6 +55,7 @@ State.StateT = (M) => {
         });
     };
 
+    // https://hackage.haskell.org/package/mmorph-1.0.9/docs/Control-Monad-Morph.html#g:1
     StateT.hoist = (f) => (m) => {
         return StateT((s) => {
             return f(m.evalState(s)).map((x) => Tuple2(x, s));
