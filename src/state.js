@@ -55,7 +55,7 @@ State.StateT = (M) => {
         });
     };
 
-    StateT.liftf = (f) => (m) => {
+    StateT.hoist = (f) => (m) => {
         return StateT((s) => {
             return f(m.evalState(s)).map((x) => Tuple2(x, s));
         });
