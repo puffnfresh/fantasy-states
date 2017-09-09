@@ -2,17 +2,18 @@
 
 const daggy = require('daggy');
 
+const {of, chain, map, ap} = require('fantasy-land');
 const {Tuple2} = require('fantasy-tuples');
 const {constant} = require('fantasy-combinators');
 
 const State = daggy.tagged('run');
 
 // Methods
-State.of = (a) => {
+State[of] = (a) => {
     return State((b) => Tuple2(a, b));
 };
 
-State.prototype.chain = function(f) {
+State.prototype[chain] = function(f) {
     return State((s) => {
         const result = this.run(s);
         return f(result._1).run(result._2);
@@ -38,12 +39,12 @@ State.prototype.exec = function(s) {
 };
 
 // Derived
-State.prototype.map = function(f) {
-    return this.chain((a) => State.of(f(a)));
+State.prototype[map] = function(f) {
+    return this[chain]((a) => State[of](f(a)));
 };
 
-State.prototype.ap = function(a) {
-    return this.chain((f) => a.map(f));
+State.prototype[ap] = function(a) {
+    return this[chain]((f) => a[map](f));
 };
 
 // Transformer
@@ -51,32 +52,32 @@ State.StateT = (M) => {
     const StateT = daggy.tagged('run');
     StateT.lift = (m) => {
         return StateT((b) => {
-            return m.map((c) => Tuple2(c, b));
+            return m[map]((c) => Tuple2(c, b));
         });
     };
 
     // https://hackage.haskell.org/package/mmorph-1.0.9/docs/Control-Monad-Morph.html#g:1
     StateT.hoist = (f) => (m) => {
         return StateT((s) => {
-            return f(m.evalState(s)).map((x) => Tuple2(x, s));
+            return f(m.evalState(s))[map]((x) => Tuple2(x, s));
         });
     };
 
-    StateT.of = (a) => {
-        return StateT((b) => M.of(Tuple2(a, b)));
+    StateT[of] = (a) => {
+        return StateT((b) => M[of](Tuple2(a, b)));
     };
 
-    StateT.prototype.chain = function(f) {
+    StateT.prototype[chain] = function(f) {
         return StateT((s) => {
             const result = this.run(s);
-            return result.chain((t) => f(t._1).run(t._2));
+            return result[chain]((t) => f(t._1).run(t._2));
         });
     };
 
-    StateT.get = StateT((s) => M.of(Tuple2(s, s)));
+    StateT.get = StateT((s) => M[of](Tuple2(s, s)));
 
     StateT.modify = (f) => {
-        return StateT((s) => M.of(Tuple2(null, f(s))));
+        return StateT((s) => M[of](Tuple2(null, f(s))));
     };
 
     StateT.put = function(s) {
@@ -84,19 +85,19 @@ State.StateT = (M) => {
     };
 
     StateT.prototype.evalState = function(s) {
-        return this.run(s).map((t) => t._1);
+        return this.run(s)[map]((t) => t._1);
     };
 
     StateT.prototype.exec = function(s) {
-        return this.run(s).map((t) => t._2);
+        return this.run(s)[map]((t) => t._2);
     };
 
-    StateT.prototype.map = function(f) {
-        return this.chain((a) => StateT.of(f(a)));
+    StateT.prototype[map] = function(f) {
+        return this[chain]((a) => StateT[of](f(a)));
     };
 
-    StateT.prototype.ap = function(a) {
-        return this.chain((f) => a.map(f));
+    StateT.prototype[ap] = function(a) {
+        return this[chain]((f) => a[map](f));
     };
 
     return StateT;

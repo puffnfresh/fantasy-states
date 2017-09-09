@@ -1,3 +1,4 @@
+const {chain, map} = require('fantasy-land');
 const State = require('../fantasy-state');
 const {Tuple2} = require('fantasy-tuples');
 const {constant} = require('fantasy-combinators');
@@ -10,7 +11,7 @@ const next = discard(
     State.modify((t) => {
         return Tuple2(t._1 + 1, (t._1 + 1) * t._2);
     }),
-    State.get.map(snd)
+    State.get[map](snd)
 );
 
 // Number
@@ -23,7 +24,7 @@ function snd(t) {
 
 // (m a, m b) -> m b
 function discard(a, b) {
-    return a.chain(constant(b));
+    return a[chain](constant(b));
 }
 
 // Array (m a) -> m a
